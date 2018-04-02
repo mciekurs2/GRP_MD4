@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>MD4</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body { margin: 0;  overflow: hidden}
+    </style>
+</head>
+<body>
+
+<!--Ielade nepiecieshamos script failus-->
+<script src="three.min.js"></script>
+<script src="OrbitControls.js"></script>
+
+<script>
+    //izsauc funkcijas
+    init();
+    createWorld();
+    createLights();
+    animate();
+
+    function init() {
+        //izveido scene
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color( 0xcccccc );
+
+        //izveido renderer
+        renderer = new THREE.WebGLRenderer();
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+
+        //izveido camera
+        camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+        camera.position.set( 400, 200, 0 );
+
+        //izveido controls
+        controls = new THREE.OrbitControls( camera, renderer.domElement );
+        controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+        controls.dampingFactor = 0.25;
+        controls.panningMode = THREE.HorizontalPanning; // default is THREE.ScreenSpacePanning
+        controls.minDistance = 100;
+        controls.maxDistance = 500;
+        controls.maxPolarAngle = Math.PI / 2;
+
+        //nepieciešams, lai vispar ko redzetu!
+        document.body.appendChild( renderer.domElement );
+
+    }
+
+    function createWorld() {
+        var geometry = new THREE.CylinderGeometry( 0, 10, 30, 4, 1 );
+        var material = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } );
+
+        for ( var i = 0; i < 500; i ++ ) {
+            var mesh = new THREE.Mesh( geometry, material );
+            mesh.position.x = Math.random() * 1600 - 800;
+            mesh.position.y = 0;
+            mesh.position.z = Math.random() * 1600 - 800;
+            mesh.updateMatrix();
+            mesh.matrixAutoUpdate = false;
+            scene.add( mesh );
+        }
+
+    }
+
+    function createLights() {
+        var light = new THREE.DirectionalLight( 0xffffff );
+        light.position.set( 1, 1, 1 );
+        scene.add( light );
+
+        var light = new THREE.DirectionalLight( 0x002288 );
+        light.position.set( - 1, - 1, - 1 );
+        scene.add( light );
+
+        var light = new THREE.AmbientLight( 0x222222 );
+        scene.add( light );
+
+        //eventListener priekš funkcijas onResize()
+        window.addEventListener( 'resize', onResize, false );
+
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
+        render();
+    }
+
+    function onResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function render() {
+        renderer.render(scene, camera);
+    }
+
+</script>
+</body>
+</html>
