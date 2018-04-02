@@ -13,16 +13,11 @@
 <script src="three.min.js"></script>
 <script src="OrbitControls.js"></script>
 <script src="GLTFLoader.js"></script>
+<script src="DragControls.js"></script>
 <script>
-
-    //funkcija prikesh FPS counter
-    (function(){let script=document.createElement('script');script.onload=function()
-    {let stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop()
-    {stats.update();requestAnimationFrame(loop)});};
-    script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})();
-
     //nodefine globalos mainigos
     let envMap, renderer, camera, light, controls;
+    var dragArray = [];
 
     //izsauc funkcijas
     init();
@@ -30,13 +25,19 @@
     createLights();
     animate();
 
+    //dragFunction
+    dragObject();
+
+    //fps counter
+    showStats();
+
     //pievieno istabas elementus
-    createRoomItem("istaba/melna_grida.gltf", 200, 200, 200, 0, 0, 0, 0, 0, 0);
-    createRoomItem("istaba/paklajs.gltf", 20, 20, 20, 0, 4, 0, 0, 0, 0);
-    createRoomItem("istaba/divans.gltf", 100, 100, 100, 0, 20, 100, 0, 0, 0);
-    createRoomItem("istaba/galds.gltf", 25, 25, 25, 0, 27, -130, 0, -89.54, 0);
-    createRoomItem("istaba/tv.gltf", 0.18, 0.18, 0.18, 0, 47, -134, -89.54, 0, 179.08);
-    createRoomItem("istaba/naktsgaldins.gltf", 60, 60, 60, 100, 20, 100, 0, -89.54, 0);
+    createRoomItem("grida", "istaba/melna_grida.gltf", 200, 200, 200, 0, 0, 0, 0, 0, 0);
+    createRoomItem("paklajs", "istaba/paklajs.gltf", 20, 20, 20, 0, 4, 0, 0, 0, 0);
+    createRoomItem("divans", "istaba/divans.gltf", 100, 100, 100, 0, 20, 100, 0, 0, 0);
+    createRoomItem("galds", "istaba/galds.gltf", 25, 25, 25, 0, 27, -130, 0, -89.54, 0);
+    createRoomItem("tv", "istaba/tv.gltf", 0.18, 0.18, 0.18, 0, 47, -134, -89.54, 0, 179.08);
+    createRoomItem("naktsgaldins", "istaba/naktsgaldins.gltf", 60, 60, 60, 100, 20, 100, 0, -89.54, 0);
 
     function init() {
         //izveido scene
@@ -49,7 +50,6 @@
 
         renderer.setPixelRatio( window.devicePixelRatio );
         renderer.setSize( window.innerWidth, window.innerHeight );
-
 
         //izveido camera
         camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
@@ -68,7 +68,7 @@
         document.body.appendChild( renderer.domElement );
     }
 
-    function createRoomItem(path, scaleX, scaleY, scaleZ, positionX, positionY, positionZ, rotX, rotY, rotZ) {
+    function createRoomItem(name, path, scaleX, scaleY, scaleZ, positionX, positionY, positionZ, rotX, rotY, rotZ) {
         var loader = new THREE.GLTFLoader();
         loader.load( path, function ( gltf ) {
             gltf.scene.scale.set(scaleX, scaleY, scaleZ);
@@ -77,16 +77,25 @@
             gltf.castShadow = true;
             gltf.receiveShadow = true;
 
-            gltf.name = "ele";
+            //assign name
+            gltf.name = "name";
 
             gltf.scene.traverse( function ( child ) {
                 if ( child.isMesh ) {
                     child.material.envMap = envMap;
+                    dragArray.push(child);
                 }
             } );
             scene.add( gltf.scene );
 
         } );
+    }
+
+    function dragObject() {
+        let dragControls = new THREE.DragControls(dragArray, camera, renderer.domElement);
+        dragControls.addEventListener('start', function () { controls.enabled = false; });
+        dragControls.addEventListener('end', function () { controls.enabled = true; });
+
     }
     
     function createWorld() {
@@ -123,6 +132,20 @@
         requestAnimationFrame(animate);
         controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
         render();
+    }
+
+    function showStats() {
+        let script = document.createElement('script');
+        script.onload=function(){
+            let stats=new Stats();
+            document.body.appendChild(stats.dom);
+            requestAnimationFrame(function loop(){
+                stats.update();
+                requestAnimationFrame(loop)
+            });
+        };
+        script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';
+        document.head.appendChild(script);
     }
 
     function onResize() {
