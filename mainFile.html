@@ -17,7 +17,9 @@
 <script>
     //nodefine globalos mainigos
     let envMap, renderer, camera, light, controls;
-    var dragArray = [];
+
+    //izmanto, lai saglabaatu GLTFL objektus
+    let dragArray = [];
 
     //izsauc funkcijas
     init();
@@ -93,8 +95,9 @@
 
     function dragObject() {
         let dragControls = new THREE.DragControls(dragArray, camera, renderer.domElement);
-        dragControls.addEventListener('start', function () { controls.enabled = false; });
-        dragControls.addEventListener('end', function () { controls.enabled = true; });
+        /** Nav jegas, jo strada tikai ar THREE.TrackballControls, bet tik un taa tas nesalabo glichy moving*/
+        //dragControls.addEventListener('dragstart', function ( event ) { controls.enabled = false;});
+        //dragControls.addEventListener('dragend', function ( event ) { controls.enabled = true;});
 
     }
     
