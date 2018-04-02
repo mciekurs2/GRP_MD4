@@ -9,7 +9,6 @@
     </style>
 </head>
 <body>
-
 <!--Ielade nepiecieshamos script failus-->
 <script src="three.min.js"></script>
 <script src="OrbitControls.js"></script>
@@ -18,13 +17,14 @@
     //izsauc funkcijas
     init();
     createWorld();
+    createHelmet()
     createLights();
     animate();
 
     function init() {
         //izveido scene
         scene = new THREE.Scene();
-        scene.background = new THREE.Color( 0xcccccc );
+        //scene.background = new THREE.Color( 0xcccccc );
 
         //izveido renderer
         renderer = new THREE.WebGLRenderer();
@@ -49,20 +49,19 @@
 
     }
 
+    function createHelmet() {
+
+    }
+
     function createWorld() {
-        var geometry = new THREE.CylinderGeometry( 0, 10, 30, 4, 1 );
-        var material = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } );
-
-        for ( var i = 0; i < 500; i ++ ) {
-            var mesh = new THREE.Mesh( geometry, material );
-            mesh.position.x = Math.random() * 1600 - 800;
-            mesh.position.y = 0;
-            mesh.position.z = Math.random() * 1600 - 800;
-            mesh.updateMatrix();
-            mesh.matrixAutoUpdate = false;
-            scene.add( mesh );
-        }
-
+        //izveido skybox
+        let path = 'skyboxsun25deg/';
+        let format = '.jpg';
+        scene.background = new THREE.CubeTextureLoader().load([
+            path + 'px' + format, path + 'nx' + format,
+            path + 'py' + format, path + 'ny' + format,
+            path + 'pz' + format, path + 'nz' + format
+        ]);
     }
 
     function createLights() {
