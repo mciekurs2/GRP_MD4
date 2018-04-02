@@ -12,14 +12,20 @@
 <!--Ielade nepiecieshamos script failus-->
 <script src="three.min.js"></script>
 <script src="OrbitControls.js"></script>
-
+<script src="GLTFLoader.js"></script>
 <script>
+    //nodefine globalos mainigos
+    let envMap;
+
     //izsauc funkcijas
     init();
     createWorld();
-    createHelmet()
     createLights();
     animate();
+
+    //pievieno istabas elementus
+    createRoomItem("istaba/melna_grida.gltf", 200, 200, 200, 0, 0, 0);
+    createRoomItem("istaba/paklajs.gltf", 20, 20, 20, 4, 4, 4);
 
     function init() {
         //izveido scene
@@ -27,7 +33,7 @@
         //scene.background = new THREE.Color( 0xcccccc );
 
         //izveido renderer
-        renderer = new THREE.WebGLRenderer();
+        renderer = new THREE.WebGLRenderer({antialias: true});
         renderer.setPixelRatio( window.devicePixelRatio );
         renderer.setSize( window.innerWidth, window.innerHeight );
 
@@ -46,22 +52,33 @@
 
         //nepieciešams, lai vispar ko redzetu!
         document.body.appendChild( renderer.domElement );
-
     }
 
-    function createHelmet() {
-
+    function createRoomItem(path, scaleX, scaleY, scaleZ, positionX, positionY, positionZ) {
+        let loader = new THREE.GLTFLoader();
+        loader.load( path, function ( gltf ) {
+            gltf.scene.scale.set(scaleX, scaleY, scaleZ);
+            gltf.scene.position.set(positionX, positionY, positionZ);
+            gltf.scene.traverse( function ( child ) {
+                if ( child.isMesh ) {
+                    child.material.envMap = envMap;
+                }
+            } );
+            scene.add( gltf.scene );
+        } );
     }
 
     function createWorld() {
         //izveido skybox
         let path = 'skyboxsun25deg/';
         let format = '.jpg';
-        scene.background = new THREE.CubeTextureLoader().load([
+        let envMap = new THREE.CubeTextureLoader().load([
             path + 'px' + format, path + 'nx' + format,
             path + 'py' + format, path + 'ny' + format,
             path + 'pz' + format, path + 'nz' + format
         ]);
+        scene.background = envMap;
+
     }
 
     function createLights() {
