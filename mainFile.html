@@ -14,8 +14,15 @@
 <script src="OrbitControls.js"></script>
 <script src="GLTFLoader.js"></script>
 <script>
+
+    //funkcija prikesh FPS counter
+    (function(){let script=document.createElement('script');script.onload=function()
+    {let stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop()
+    {stats.update();requestAnimationFrame(loop)});};
+    script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})();
+
     //nodefine globalos mainigos
-    let envMap;
+    let envMap, renderer, camera, light, controls;
 
     //izsauc funkcijas
     init();
@@ -31,15 +38,18 @@
     createRoomItem("istaba/tv.gltf", 0.18, 0.18, 0.18, 0, 47, -134, -89.54, 0, 179.08);
     createRoomItem("istaba/naktsgaldins.gltf", 60, 60, 60, 100, 20, 100, 0, -89.54, 0);
 
-
     function init() {
         //izveido scene
         scene = new THREE.Scene();
 
         //izveido renderer
         renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer.shadowMap.enabled = true; //nestrada?
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
         renderer.setPixelRatio( window.devicePixelRatio );
         renderer.setSize( window.innerWidth, window.innerHeight );
+
 
         //izveido camera
         camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
@@ -59,20 +69,26 @@
     }
 
     function createRoomItem(path, scaleX, scaleY, scaleZ, positionX, positionY, positionZ, rotX, rotY, rotZ) {
-        let loader = new THREE.GLTFLoader();
+        var loader = new THREE.GLTFLoader();
         loader.load( path, function ( gltf ) {
             gltf.scene.scale.set(scaleX, scaleY, scaleZ);
             gltf.scene.position.set(positionX, positionY, positionZ);
             gltf.scene.rotation.set(rotX, rotY, rotZ);
+            gltf.castShadow = true;
+            gltf.receiveShadow = true;
+
+            gltf.name = "ele";
+
             gltf.scene.traverse( function ( child ) {
                 if ( child.isMesh ) {
                     child.material.envMap = envMap;
                 }
             } );
             scene.add( gltf.scene );
+
         } );
     }
-
+    
     function createWorld() {
         //izveido skybox
         let path = 'skyboxsun25deg/';
@@ -87,16 +103,16 @@
     }
 
     function createLights() {
-        var light = new THREE.DirectionalLight( 0xffffff );
-        light.position.set( 1, 1, 1 );
+        light = new THREE.PointLight( 0xffffff, 1, 500 );
+        light.position.set( 0, 100, 0 );
+        light.castShadow = true;
         scene.add( light );
 
-        var light = new THREE.DirectionalLight( 0x002288 );
-        light.position.set( - 1, - 1, - 1 );
-        scene.add( light );
-
-        var light = new THREE.AmbientLight( 0x222222 );
-        scene.add( light );
+        //shadow iestatijumi
+        light.shadow.mapSize.width = 512;  // default
+        light.shadow.mapSize.height = 512; // default
+        light.shadow.camera.near = 0.5;       // default
+        light.shadow.camera.far = 500;      // default
 
         //eventListener priekš funkcijas onResize()
         window.addEventListener( 'resize', onResize, false );
@@ -117,8 +133,10 @@
     }
 
     function render() {
+        controls.update();
         renderer.render(scene, camera);
     }
+
 
 </script>
 </body>
