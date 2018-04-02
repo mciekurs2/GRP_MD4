@@ -24,13 +24,17 @@
     animate();
 
     //pievieno istabas elementus
-    createRoomItem("istaba/melna_grida.gltf", 200, 200, 200, 0, 0, 0);
-    createRoomItem("istaba/paklajs.gltf", 20, 20, 20, 4, 4, 4);
+    createRoomItem("istaba/melna_grida.gltf", 200, 200, 200, 0, 0, 0, 0, 0, 0);
+    createRoomItem("istaba/paklajs.gltf", 20, 20, 20, 0, 4, 0, 0, 0, 0);
+    createRoomItem("istaba/divans.gltf", 100, 100, 100, 0, 20, 100, 0, 0, 0);
+    createRoomItem("istaba/galds.gltf", 25, 25, 25, 0, 28, -130, 0, -89.54, 0);
+    createRoomItem("istaba/tv.gltf", 0.18, 0.18, 0.18, 0, 48.5, -134, -89.54, 0, 179.08);
+    createRoomItem("istaba/naktsgaldins.gltf", 60, 60, 60, 100, 20, 100, 0, -89.54, 0);
+
 
     function init() {
         //izveido scene
         scene = new THREE.Scene();
-        //scene.background = new THREE.Color( 0xcccccc );
 
         //izveido renderer
         renderer = new THREE.WebGLRenderer({antialias: true});
@@ -54,11 +58,12 @@
         document.body.appendChild( renderer.domElement );
     }
 
-    function createRoomItem(path, scaleX, scaleY, scaleZ, positionX, positionY, positionZ) {
+    function createRoomItem(path, scaleX, scaleY, scaleZ, positionX, positionY, positionZ, rotX, rotY, rotZ) {
         let loader = new THREE.GLTFLoader();
         loader.load( path, function ( gltf ) {
             gltf.scene.scale.set(scaleX, scaleY, scaleZ);
             gltf.scene.position.set(positionX, positionY, positionZ);
+            gltf.scene.rotation.set(rotX, rotY, rotZ);
             gltf.scene.traverse( function ( child ) {
                 if ( child.isMesh ) {
                     child.material.envMap = envMap;
