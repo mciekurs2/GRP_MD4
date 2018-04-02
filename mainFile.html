@@ -10,28 +10,33 @@
 </head>
 <body>
 <!--Ielade nepiecieshamos script failus-->
-<script src="three.min.js"></script>
-<script src="OrbitControls.js"></script>
-<script src="GLTFLoader.js"></script>
-<script src="DragControls.js"></script>
+<script src="scripts/three.min.js"></script>
+<script src="scripts/OrbitControls.js"></script>
+<script src="scripts/GLTFLoader.js"></script>
+<script src="scripts/DragControls.js"></script>
+<script src="scripts/stats.min.js"></script>
 <script>
     //nodefine globalos mainigos
-    let envMap, renderer, camera, light, controls;
+    let envMap, renderer, camera, light, controls, stats, mouse, raycaster, selectedObj;
 
     //izmanto, lai saglabaatu GLTFL objektus
     let dragArray = [];
 
     //izsauc funkcijas
     init();
-    createWorld();
+    createSkyBox();
     createLights();
-    animate();
 
     //dragFunction
     dragObject();
 
+    extraFunction();
+
     //fps counter
     showStats();
+
+    //izveido nepiecišamās animācijas
+    animate();
 
     //pievieno istabas elementus
     createRoomItem("grida", "istaba/melna_grida.gltf", 200, 200, 200, 0, 0, 0, 0, 0, 0);
@@ -101,9 +106,9 @@
 
     }
     
-    function createWorld() {
+    function createSkyBox() {
         //izveido skybox
-        let path = 'skyboxsun25deg/';
+        let path = 'skybox/';
         let format = '.jpg';
         let envMap = new THREE.CubeTextureLoader().load([
             path + 'px' + format, path + 'nx' + format,
@@ -131,24 +136,56 @@
 
     }
 
+    function extraFunction() {
+        //what objects in the 3d space the mouse is over
+        raycaster = new THREE.Raycaster();
+        //A direction and length across a plane
+        mouse = new THREE.Vector2();
+        //glaba selectedObject info
+        selectedObj = null;
+
+        window.addEventListener('mousemove', function (event) {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            let intersects = raycaster.intersectObjects(scene.children, true);
+            for (var i = 0; i < intersects.length; i++) {
+                if (selected(intersects[i].object)) break;;
+            }}, false);
+    }
+
+    function selected(obj) {
+        if (selectedObj != obj) {
+            if (selectedObj) { /** veic iznaiņas objektam, ja selected*/ }
+            selectedObj = obj;
+            //console.log(obj.name);
+
+            //purpose of this is to represent the Minimum Bounding Boxes for objects.
+            let box = new THREE.Box3().setFromObject(obj);
+            //iegust objekta izmerus(dimensijas)
+            let width = box.max.x - box.min.x;
+            let height = box.max.y - box.min.y;
+            let depth = box.max.z - box.min.z;
+
+            //izdruka izmerus
+            console.log(`${obj.name}(name): width: ${width}, height: ${height}, depth: ${depth}`);
+
+        }
+        return true;
+    }
+
     function animate() {
+        stats.begin();
         requestAnimationFrame(animate);
         controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
         render();
+        stats.end();
     }
 
     function showStats() {
-        let script = document.createElement('script');
-        script.onload=function(){
-            let stats=new Stats();
-            document.body.appendChild(stats.dom);
-            requestAnimationFrame(function loop(){
-                stats.update();
-                requestAnimationFrame(loop)
-            });
-        };
-        script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';
-        document.head.appendChild(script);
+        stats = new Stats();
+        stats.showPanel(0);
+        document.body.appendChild(stats.dom);
     }
 
     function onResize() {
