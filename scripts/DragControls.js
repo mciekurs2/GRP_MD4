@@ -70,8 +70,14 @@ THREE.DragControls = function ( _objects, _camera, _domElement ) {
 		if ( _selected && scope.enabled ) {
 
 			if ( _raycaster.ray.intersectPlane( _plane, _intersection ) ) {
+				let parent = _selected.parent; //noskaidrot vecako objektu
+            	_intersection.sub( _offset );
+				while(parent){
+					_intersection.divide(parent.scale);
+					parent = parent.parent; //kapjam uz augshu (ies tikmer kamer nebus neviena vecaaka elementa)
+				}
 
-				_selected.position.copy( _intersection.sub( _offset ) );
+				_selected.position.copy( _intersection );
 
 			}
 
