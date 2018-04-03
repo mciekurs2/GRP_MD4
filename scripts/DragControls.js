@@ -73,7 +73,9 @@ THREE.DragControls = function ( _objects, _camera, _domElement ) {
 				let parent = _selected.parent; //noskaidrot vecako objektu
             	_intersection.sub( _offset );
 				while(parent){
-					_intersection.divide(parent.scale);
+					//rotee preteeji vecajam
+					_intersection.applyQuaternion(parent.quaternion.clone().conjugate());
+					_intersection.divide(parent.scale); //nem vera scale
 					parent = parent.parent; //kapjam uz augshu (ies tikmer kamer nebus neviena vecaaka elementa)
 				}
 
